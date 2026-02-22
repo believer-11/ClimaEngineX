@@ -29,11 +29,15 @@ pipeline {
         }
 
 
-        stage('SonarQube Analysis') {
+       stage('SonarQube Analysis') {
+            environment {
+                // This tells Jenkins exactly where the sonar-scanner executable is
+                SCANNER_HOME = tool 'sonar-scanner'
+            }
             steps {
                 withSonarQubeEnv('sonarqube-server') {
                     sh '''
-                        sonar-scanner \
+                        ${SCANNER_HOME}/bin/sonar-scanner \
                           -Dsonar.projectKey=knoxweather \
                           -Dsonar.projectName=knoxweather \
                           -Dsonar.sources=. \

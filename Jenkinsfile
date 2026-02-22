@@ -102,13 +102,13 @@ pipeline {
         }
         success {
             echo '✅ Pipeline completed successfully!'
-            mail to: 'your-email@example.com',
+            mail to: 'rsatale1111@gmail.com',
                  subject: "✅ SUCCESS: Jenkins Pipeline - ${currentBuild.fullDisplayName}",
                  body: "Great news! The KnoxWeather pipeline completed successfully.\n\nProject: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}"
         }
         failure {
             echo '❌ Pipeline failed!'
-            mail to: 'your-email@example.com',
+            mail to: 'rsatale1111@gmail.com',
                  subject: "❌ FAILED: Jenkins Pipeline - ${currentBuild.fullDisplayName}",
                  body: "Attention required! The KnoxWeather pipeline failed.\n\nProject: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}\n\nPlease check the console output for errors."
         }

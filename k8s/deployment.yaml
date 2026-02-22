@@ -1,1 +1,20 @@
-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knoxweather
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: knoxweather }
+  template:
+    metadata:
+      labels: { app: knoxweather }
+    spec:
+      containers:
+        - name: knoxweather
+          image: <DOCKERHUB_USER>/knoxweather:latest # Jenkins will update this automatically
+          ports: [{ containerPort: 5000 }]
+          env:
+            - name: OPENWEATHER_API_KEY
+              valueFrom:
+                secretKeyRef: { name: app-secrets, key: OPENWEATHER_API_KEY }

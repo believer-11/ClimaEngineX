@@ -5,7 +5,7 @@ pipeline {
         // Jenkins Credentials IDs
         DOCKERHUB_CREDS = credentials('dockerhub-creds')
         SONAR_TOKEN     = credentials('sonar-token')
-        SONAR_URL       = 'http://<CI_SERVER_IP>:9000'
+        SONAR_URL       = 'http://3.133.122.225:9000'
 
         DOCKER_IMAGE    = "${DOCKERHUB_CREDS_USR}/knoxweather"
         IMAGE_TAG       = "${BUILD_NUMBER}"
@@ -106,13 +106,13 @@ pipeline {
         }
         success {
             echo '✅ Pipeline completed successfully!'
-            mail to: 'your-real-email@example.com',
+            mail to: 'rsatale1111@gmail.com',
                  subject: "✅ SUCCESS: Jenkins Pipeline - ${currentBuild.fullDisplayName}",
                  body: "Great news! The KnoxWeather pipeline completed successfully.\\n\\nProject: ${env.JOB_NAME}\\nBuild Number: ${env.BUILD_NUMBER}\\nURL: ${env.BUILD_URL}"
         }
         failure {
             echo '❌ Pipeline failed!'
-            mail to: 'your-real-email@example.com',
+            mail to: 'rsatale1111@gmail.com',
                  subject: "❌ FAILED: Jenkins Pipeline - ${currentBuild.fullDisplayName}",
                  body: "Attention required! The KnoxWeather pipeline failed.\\n\\nProject: ${env.JOB_NAME}\\nBuild Number: ${env.BUILD_NUMBER}\\nURL: ${env.BUILD_URL}\\n\\nPlease check the console output for errors."
         }

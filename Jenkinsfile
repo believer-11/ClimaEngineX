@@ -5,11 +5,11 @@ pipeline {
         // Jenkins Credentials IDs
         DOCKERHUB_CREDS = credentials('dockerhub-creds')
         SONAR_TOKEN     = credentials('sonar-token')
-        SONAR_URL       = 'http://<SONARQUBE_IP>:9000'
+        SONAR_URL       = 'http://<CI_SERVER_IP>:9000'
 
         DOCKER_IMAGE    = "${DOCKERHUB_CREDS_USR}/knoxweather"
         IMAGE_TAG       = "${BUILD_NUMBER}"
-        GITOPS_REPO     = 'https://github.com/<YOUR_GITHUB_USER>/knoxweather-k8s-manifests.git'
+        GITOPS_REPO     = 'https://github.com/believer-11/ClimaEngineX.git'
     }
 
     stages {
@@ -17,7 +17,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/<YOUR_GITHUB_USER>/knoxweather.git'
+                git branch: 'main', url: "${GITOPS_REPO}"
             }
         }
 
@@ -74,21 +74,25 @@ pipeline {
             }
         }
 
-        stage('Update GitOps Repo') {
+        stage('Update K8s Manifests') {
             steps {
                 withCredentials([gitUsernamePassword(credentialsId: 'github-creds', gitToolName: 'Default')]) {
                     sh '''
-                        git clone ${GITOPS_REPO} gitops
-                        cd gitops
+                        # Go into the new k8s folder you created
+                        cd k8s
 
                         # Overwrite image value with new tag
                         sed -i "s|image:.*|image: '"${DOCKER_IMAGE}:${IMAGE_TAG}"'|" deployment.yaml
 
                         git config user.email "jenkins@knoxcloud.tech"
                         git config user.name "Jenkins CI"
+                        
+                        # Commit the change directly back to this repo
                         git add deployment.yaml
-                        git commit -m "Pipeline deployment: ${IMAGE_TAG}"
-                        git push "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/<YOUR_GITHUB_USER>/knoxweather-k8s-manifests.git" main
+                        # Use [ci skip] in the commit message so GitHub doesn't trigger another Jenkins build by accident!
+                        git commit -m "Pipeline deployment: ${IMAGE_TAG} [ci skip]"
+                        
+                        git push "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/believer-11/ClimaEngineX.git" main
                     '''
                 }
             }
@@ -102,15 +106,15 @@ pipeline {
         }
         success {
             echo '✅ Pipeline completed successfully!'
-            mail to: 'rsatale1111@gmail.com',
+            mail to: 'your-real-email@example.com',
                  subject: "✅ SUCCESS: Jenkins Pipeline - ${currentBuild.fullDisplayName}",
-                 body: "Great news! The KnoxWeather pipeline completed successfully.\n\nProject: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}"
+                 body: "Great news! The KnoxWeather pipeline completed successfully.\\n\\nProject: ${env.JOB_NAME}\\nBuild Number: ${env.BUILD_NUMBER}\\nURL: ${env.BUILD_URL}"
         }
         failure {
             echo '❌ Pipeline failed!'
-            mail to: 'rsatale1111@gmail.com',
+            mail to: 'your-real-email@example.com',
                  subject: "❌ FAILED: Jenkins Pipeline - ${currentBuild.fullDisplayName}",
-                 body: "Attention required! The KnoxWeather pipeline failed.\n\nProject: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}\n\nPlease check the console output for errors."
+                 body: "Attention required! The KnoxWeather pipeline failed.\\n\\nProject: ${env.JOB_NAME}\\nBuild Number: ${env.BUILD_NUMBER}\\nURL: ${env.BUILD_URL}\\n\\nPlease check the console output for errors."
         }
     }
 }

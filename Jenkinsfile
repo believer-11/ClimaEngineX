@@ -20,6 +20,17 @@ pipeline {
                 git branch: 'main', url: "${GITOPS_REPO}"
             }
         }
+        stage('Check for CI Skip') {
+            steps {
+                script {
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    if (commitMessage.contains('[ci skip]')) {
+                        currentBuild.result = 'NOT_BUILT'
+                        error('Build skipped due to [ci skip] in commit message')
+                    }
+                }
+            }
+        }
 
                 stage('OWASP Dependency-Check') {
             steps {

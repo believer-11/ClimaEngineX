@@ -5,7 +5,7 @@ pipeline {
         // Jenkins Credentials IDs
         DOCKERHUB_CREDS = credentials('dockerhub-creds')
         SONAR_TOKEN     = credentials('sonar-token')
-        SONAR_URL       = 'http://3.133.122.225:9000'
+        SONAR_URL       = 'http://13.221.244.76:9000'
 
         DOCKER_IMAGE    = "${DOCKERHUB_CREDS_USR}/knoxweather"
         IMAGE_TAG       = "${BUILD_NUMBER}"
@@ -21,23 +21,18 @@ pipeline {
             }
         }
 
-         stage('OWASP Dependency-Check') {
+        stage('OWASP Dependency-Check') {
             steps {
-                dependencyCheck additionalArguments: ' --scan . --format HTML --format XML', odcInstallation: 'DP-Check'
+                dependencyCheck additionalArguments: '--scan . --format HTML --format XML', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: 'dependency-check-report.xml'
             }
         }
 
-
-       stage('SonarQube Analysis') {
-            environment {
-                // This tells Jenkins exactly where the sonar-scanner executable is
-                SCANNER_HOME = tool 'sonar-scanner'
-            }
+        stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonarqube-server') {
                     sh '''
-                        ${SCANNER_HOME}/bin/sonar-scanner \
+                        sonar-scanner \
                           -Dsonar.projectKey=knoxweather \
                           -Dsonar.projectName=knoxweather \
                           -Dsonar.sources=. \

@@ -29,27 +29,30 @@ pipeline {
             }
         }
 
-        stage('Check for CI Skip') {
+              stage('Check for CI Skip') {
             steps {
                 script {
                     def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
                     if (commitMessage.contains('[ci skip]')) {
-                        currentBuild.result = 'NOT_BUILT'
-                        error('Build skipped due to [ci skip] in commit message')
+                        env.SKIP_CI = 'true'
+                        currentBuild.description = 'Build skipped gracefully'
+                    } else {
+                        env.SKIP_CI = 'false'
                     }
                 }
             }
         }
 
-                stage('OWASP Dependency-Check') {
+        stage('OWASP Dependency-Check') {
+            when { expression { env.SKIP_CI != 'true' } }
             steps {
-                dependencyCheck additionalArguments: ' --scan ./', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                dependencyCheck additionalArguments: '--scan . --format HTML --format XML', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
             }
         }
 
-
-                stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
+            when { expression { env.SKIP_CI != 'true' } }
             environment {
                 SCANNER_HOME = tool 'sonar-scanner'
             }
@@ -67,32 +70,36 @@ pipeline {
             }
         }
 
-
         stage('Quality Gate') {
+            when { expression { env.SKIP_CI != 'true' } }
             steps {
                 timeout(time: 5, unit: 'MINUTES') { waitForQualityGate abortPipeline: true }
             }
         }
 
         stage('Trivy FS Scan') {
+            when { expression { env.SKIP_CI != 'true' } }
             steps {
                 sh 'trivy fs --severity HIGH,CRITICAL --format table .'
             }
         }
 
         stage('Docker Build') {
+            when { expression { env.SKIP_CI != 'true' } }
             steps {
                 sh "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} ."
             }
         }
 
         stage('Trivy Image Scan') {
+            when { expression { env.SKIP_CI != 'true' } }
             steps {
                 sh "trivy image --severity HIGH,CRITICAL --format table ${DOCKER_IMAGE}:${IMAGE_TAG}"
             }
         }
 
         stage('Push to DockerHub') {
+            when { expression { env.SKIP_CI != 'true' } }
             steps {
                 sh "echo ${DOCKERHUB_CREDS_PSW} | docker login -u ${DOCKERHUB_CREDS_USR} --password-stdin"
                 sh "docker push ${DOCKER_IMAGE}:${IMAGE_TAG}"
@@ -100,6 +107,7 @@ pipeline {
         }
 
         stage('Update K8s Manifests') {
+            when { expression { env.SKIP_CI != 'true' } }
             steps {
                 withCredentials([gitUsernamePassword(credentialsId: 'github-creds', gitToolName: 'Default')]) {
                     sh '''
@@ -118,12 +126,10 @@ pipeline {
                         git commit -m "Pipeline deployment: ${IMAGE_TAG} [ci skip]"
                         
                         git push "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/believer-11/ClimaEngineX.git" HEAD:main
-
                     '''
                 }
             }
         }
-    }
 
     post {
         always {

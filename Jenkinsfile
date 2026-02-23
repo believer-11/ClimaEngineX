@@ -15,11 +15,20 @@ pipeline {
     stages {
         stage('Clean Workspace') { steps { cleanWs() } }
 
-        stage('Checkout') {
+                stage('Checkout') {
             steps {
-                git branch: 'main', url: "${GITOPS_REPO}"
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [
+                        [$class: 'MessageExclusion', excludedMessage: '(?s).*?\\[ci skip\\].*']
+                    ],
+                    userRemoteConfigs: [[url: "${GITOPS_REPO}"]]
+                ])
             }
         }
+
         stage('Check for CI Skip') {
             steps {
                 script {

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: knoxweather-container
-          image: rupeshs11/knoxweather:latest # Jenkins will update this automatically
+          image: 'rupeshs11/knoxweather:5'
           ports:
             - containerPort: 5000
           resources:

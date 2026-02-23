@@ -29,11 +29,14 @@ pipeline {
         }
 
 
-        stage('SonarQube Analysis') {
+                stage('SonarQube Analysis') {
+            environment {
+                SCANNER_HOME = tool 'sonar-scanner'
+            }
             steps {
                 withSonarQubeEnv('sonarqube-server') {
                     sh '''
-                        sonar-scanner \
+                        ${SCANNER_HOME}/bin/sonar-scanner \
                           -Dsonar.projectKey=knoxweather \
                           -Dsonar.projectName=knoxweather \
                           -Dsonar.sources=. \
@@ -43,6 +46,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Quality Gate') {
             steps {

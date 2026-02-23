@@ -1,20 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: knoxweather
+  name: knoxweather-deployment
 spec:
   replicas: 2
   selector:
-    matchLabels: { app: knoxweather }
+    matchLabels:
+      app: knoxweather
   template:
     metadata:
-      labels: { app: knoxweather }
+      labels:
+        app: knoxweather
     spec:
       containers:
-        - name: knoxweather
-          image: <DOCKERHUB_USER>/knoxweather:latest # Jenkins will update this automatically
-          ports: [{ containerPort: 5000 }]
-          env:
-            - name: OPENWEATHER_API_KEY
-              valueFrom:
-                secretKeyRef: { name: app-secrets, key: OPENWEATHER_API_KEY }
+        - name: knoxweather-container
+          image: rupeshs11/knoxweather:latest # Jenkins will update this automatically
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"

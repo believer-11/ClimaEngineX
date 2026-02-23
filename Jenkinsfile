@@ -117,7 +117,8 @@ pipeline {
                         # Use [ci skip] in the commit message so GitHub doesn't trigger another Jenkins build by accident!
                         git commit -m "Pipeline deployment: ${IMAGE_TAG} [ci skip]"
                         
-                        git push "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/believer-11/ClimaEngineX.git" main
+                        git push "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/believer-11/ClimaEngineX.git" HEAD:main
+
                     '''
                 }
             }

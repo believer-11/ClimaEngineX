@@ -15,21 +15,13 @@ pipeline {
     stages {
         stage('Clean Workspace') { steps { cleanWs() } }
 
-                stage('Checkout') {
+        stage('Checkout') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    doGenerateSubmoduleConfigurations: false,
-                    extensions: [
-                        [$class: 'MessageExclusion', excludedMessage: '(?s).*?\\[ci skip\\].*']
-                    ],
-                    userRemoteConfigs: [[url: "${GITOPS_REPO}"]]
-                ])
+                git branch: 'main', url: "${GITOPS_REPO}"
             }
         }
 
-              stage('Check for CI Skip') {
+        stage('Check for CI Skip') {
             steps {
                 script {
                     def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
@@ -130,6 +122,7 @@ pipeline {
                 }
             }
         }
+    }
 
     post {
         always {

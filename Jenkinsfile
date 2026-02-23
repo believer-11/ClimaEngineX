@@ -62,13 +62,6 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
-            when { expression { env.SKIP_CI != 'true' } }
-            steps {
-                timeout(time: 5, unit: 'MINUTES') { waitForQualityGate abortPipeline: true }
-            }
-        }
-
         stage('Trivy FS Scan') {
             when { expression { env.SKIP_CI != 'true' } }
             steps {

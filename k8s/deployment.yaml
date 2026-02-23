@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: knoxweather-container
-          image: 'rupeshs11/knoxweather:6'
+          image: 'rupeshs11/knoxweather:7'
           ports:
             - containerPort: 5000
           resources:
